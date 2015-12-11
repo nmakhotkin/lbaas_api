@@ -166,8 +166,8 @@ class DbTestCase(BaseTest):
 
     def _clean_db(self):
         with db_api_v2.transaction():
-            db_api_v2.delete_listeners()
             db_api_v2.delete_members()
+            db_api_v2.delete_listeners()
 
         if not cfg.CONF.database.connection.startswith('sqlite'):
             db_sa_base.get_engine().dispose()

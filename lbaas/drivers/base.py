@@ -39,3 +39,7 @@ class LoadBalancerDriver(object):
     @abc.abstractmethod
     def delete_member(self, listener_name, member_name):
         pass
+
+    @abc.abstractmethod
+    def apply_changes(self):
+        pass
