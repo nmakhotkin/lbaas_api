@@ -46,10 +46,14 @@ class HAProxyDriver(base.LoadBalancerDriver):
         return listener
 
     def delete_listener(self, name):
-        pass
+        db_api.delete_listener(name)
 
-    def delete_member(self, listener_name, member_name):
-        pass
+        self._save_config()
+
+    def delete_member(self, name):
+        db_api.delete_member(name)
+
+        self._save_config()
 
     def update_member(self, name, member_dict):
         member = db_api.update_member(name, member_dict)

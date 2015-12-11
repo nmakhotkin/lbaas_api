@@ -127,4 +127,9 @@ class ListenersController(rest.RestController):
         """Delete the named listener."""
         LOG.info("Delete listener [name=%s]" % name)
 
-        db_api.delete_listener(name)
+        lb_driver = driver.LB_DRIVER()
+
+        with db_api.transaction():
+            lb_driver.delete_listener(name)
+
+            lb_driver.apply_changes()

@@ -153,14 +153,16 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
-    @mock.patch.object(db_api, 'delete_listener', MOCK_DELETE)
     def test_delete(self):
+        driver.LB_DRIVER().delete_listener = MOCK_DELETE
+
         resp = self.app.delete('/v1/listeners/123')
 
         self.assertEqual(204, resp.status_int)
 
-    @mock.patch.object(db_api, 'delete_listener', MOCK_NOT_FOUND)
     def test_delete_not_found(self):
+        driver.LB_DRIVER().delete_listener = MOCK_NOT_FOUND
+
         resp = self.app.delete('/v1/listeners/123', expect_errors=True)
 
         self.assertEqual(404, resp.status_int)

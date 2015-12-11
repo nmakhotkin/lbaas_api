@@ -113,7 +113,12 @@ class MembersController(rest.RestController, hooks.HookController):
         """Delete the named member."""
         LOG.info("Delete member [name=%s]" % name)
 
-        db_api.delete_member(name)
+        lb_driver = driver.LB_DRIVER()
+
+        with db_api.transaction():
+            lb_driver.delete_member(name)
+
+            lb_driver.apply_changes()
 
     @wsme_pecan.wsexpose(Members)
     def get_all(self):

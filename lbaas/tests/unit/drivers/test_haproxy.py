@@ -16,6 +16,7 @@ import mock
 
 from lbaas.db.v1.sqlalchemy import api as db_api
 from lbaas.drivers import haproxy as driver
+from lbaas import exceptions as exc
 from lbaas.tests.unit import base as test_base
 from lbaas.utils import file_utils
 
@@ -137,4 +138,89 @@ class HAProxyDriverTest(test_base.DbTestCase):
         self.assertIn(
             '\tserver %s %s:%s check' % (member.name, member.address, 8080),
             config_data
+        )
+
+    @mock.patch.object(file_utils, 'replace_file')
+    def test_delete_listener(self, replace_file):
+        haproxy = driver.HAProxyDriver()
+
+        # Create a listener first.
+        haproxy.create_listener({
+            'name': 'test_listener',
+            'description': 'my test settings',
+            'protocol': 'http',
+            'protocol_port': 80,
+            'algorithm': 'roundrobin'
+        })
+
+        listener = db_api.get_listener('test_listener')
+
+        config_data = replace_file.call_args[0][1]
+
+        self.assertIn(
+            'listen %s 0.0.0.0:%s' % (listener.name, listener.protocol_port),
+            config_data
+        )
+
+        haproxy.delete_listener(listener.name)
+
+        config_data = replace_file.call_args[0][1]
+
+        self.assertNotIn(
+            'listen %s 0.0.0.0:%s' % (listener.name, listener.protocol_port),
+            config_data
+        )
+        self.assertRaises(
+            exc.NotFoundException,
+            db_api.get_listener,
+            listener.name
+        )
+
+    @mock.patch.object(file_utils, 'replace_file')
+    def test_delete_member(self, replace_file):
+        haproxy = driver.HAProxyDriver()
+
+        # Create a listener first.
+        haproxy.create_listener({
+            'name': 'test_listener',
+            'description': 'my test settings',
+            'protocol': 'http',
+            'protocol_port': 80,
+            'algorithm': 'roundrobin'
+        })
+
+        listener = db_api.get_listener('test_listener')
+
+        haproxy.create_member(
+            listener.name,
+            {
+                'name': 'member1',
+                'address': '10.0.0.1',
+                'protocol_port': 80,
+            }
+        )
+
+        member = db_api.get_member('member1')
+
+        config_data = replace_file.call_args[0][1]
+
+        self.assertIn(
+            '\tserver %s %s:%s check' %
+            (member.name, member.address, member.protocol_port),
+            config_data
+        )
+
+        haproxy.delete_member(member.name)
+
+        config_data = replace_file.call_args[0][1]
+
+        self.assertNotIn(
+            '\tserver %s %s:%s check' %
+            (member.name, member.address, member.protocol_port),
+            config_data
+        )
+        self.assertRaises(
+            exc.NotFoundException,
+            db_api.get_member,
+            member.name
         )

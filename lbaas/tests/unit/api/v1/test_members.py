@@ -131,14 +131,16 @@ class TestMembersController(base.FunctionalTest):
 
         self.assertEqual(409, resp.status_int)
 
-    @mock.patch.object(db_api, "delete_member", MOCK_DELETE)
     def test_delete(self):
+        driver.LB_DRIVER().delete_member = MOCK_DELETE
+
         resp = self.app.delete('/v1/members/123')
 
         self.assertEqual(204, resp.status_int)
 
-    @mock.patch.object(db_api, "delete_member", MOCK_NOT_FOUND)
     def test_delete_not_found(self):
+        driver.LB_DRIVER().delete_member = MOCK_NOT_FOUND
+
         resp = self.app.delete('/v1/members/123', expect_errors=True)
 
         self.assertEqual(404, resp.status_int)
