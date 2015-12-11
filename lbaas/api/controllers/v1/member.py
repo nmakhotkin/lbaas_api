@@ -21,6 +21,8 @@ import wsmeext.pecan as wsme_pecan
 
 from lbaas.api.controllers import resource
 from lbaas.db.v1 import api as db_api
+from lbaas.drivers import driver
+from lbaas import exceptions
 from lbaas.utils import rest_utils
 
 
@@ -35,6 +37,8 @@ class Member(resource.Resource):
 
     address = wtypes.text
     protocol_port = wtypes.IntegerType()
+
+    listener_name = wtypes.text
     description = wtypes.text
 
     tags = [wtypes.text]
@@ -81,11 +85,25 @@ class MembersController(rest.RestController, hooks.HookController):
         """Create a new member."""
         LOG.info("Create member [member_name=%s]" % member.name)
 
+        if not (member.name and member.protocol_port
+                and member.address and member.listener_name):
+            raise exceptions.InputException(
+                'You must provide at least name, protocol_port, '
+                'listener_name and protocol of the listener.'
+            )
+
         pecan.response.status = 201
 
         values = member.to_dict()
+        listener_name = values.pop('listener_name')
+        lb_driver = driver.LB_DRIVER()
 
-        return Member.from_dict(db_api.create_member(values).to_dict())
+        with db_api.transaction():
+            db_model = lb_driver.create_member(listener_name, values)
+
+            lb_driver.apply_changes()
+
+        return Member.from_dict(db_model.to_dict())
 
     @rest_utils.wrap_wsme_controller_exception
     @wsme_pecan.wsexpose(None, wtypes.text, status_code=204)

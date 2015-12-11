@@ -19,6 +19,7 @@ import mock
 
 from lbaas.db.v1 import api as db_api
 from lbaas.db.v1.sqlalchemy import models as db
+from lbaas.drivers import driver
 from lbaas import exceptions as exc
 from lbaas.tests.unit.api import base
 
@@ -67,6 +68,17 @@ MOCK_DELETE = mock.MagicMock(return_value=None)
 
 
 class TestListenerController(base.FunctionalTest):
+    def setUp(self):
+        super(TestListenerController, self).setUp()
+
+        self.driver_origin = driver.LB_DRIVER
+        driver.LB_DRIVER = mock.Mock()
+
+    def tearDown(self):
+        driver.LB_DRIVER = self.driver_origin
+
+        super(TestListenerController, self).tearDown()
+
     @mock.patch.object(db_api, 'get_listeners', MOCK_LISTENERS)
     def test_get_all(self):
         resp = self.app.get('/v1/listeners')
@@ -93,8 +105,9 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
-    @mock.patch.object(db_api, 'create_listener', MOCK_LISTENER)
     def test_post(self):
+        driver.LB_DRIVER().create_listener = MOCK_LISTENER
+
         resp = self.app.post_json(
             '/v1/listeners',
             LISTENER
@@ -104,8 +117,9 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertDictEqual(LISTENER, resp.json)
 
-    @mock.patch.object(db_api, 'create_listener', MOCK_DUPLICATE)
     def test_post_dup(self):
+        driver.LB_DRIVER().create_listener = MOCK_DUPLICATE
+
         resp = self.app.post_json(
             '/v1/listeners',
             LISTENER,

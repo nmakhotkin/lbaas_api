@@ -18,6 +18,7 @@ import wsmeext.pecan as wsme_pecan
 
 from lbaas.api.controllers import resource
 from lbaas.db.v1 import api as db_api
+from lbaas.drivers import driver
 from lbaas import exceptions as exceptions
 from lbaas.utils import rest_utils
 
@@ -78,11 +79,19 @@ class ListenersController(rest.RestController):
         if not (listener.name and listener.protocol_port
                 and listener.protocol):
             raise exceptions.InputException(
-                'You must provide at least name, port and'
+                'You must provide at least name, protocol_port and'
                 ' protocol of the listener.'
             )
 
-        db_model = db_api.create_listener(listener.to_dict())
+        if not listener.algorithm:
+            listener.algorithm = 'roundrobin'
+
+        lb_driver = driver.LB_DRIVER()
+
+        with db_api.transaction():
+            db_model = lb_driver.create_listener(listener.to_dict())
+
+            lb_driver.apply_changes()
 
         return Listener.from_dict(db_model.to_dict())
 

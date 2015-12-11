@@ -18,6 +18,7 @@ import mock
 
 from lbaas.db.v1 import api as db_api
 from lbaas.db.v1.sqlalchemy import models
+from lbaas.drivers import driver
 from lbaas import exceptions as exc
 from lbaas.tests.unit.api import base
 
@@ -55,6 +56,17 @@ MOCK_DUPLICATE = mock.MagicMock(side_effect=exc.DBDuplicateEntryException())
 
 
 class TestMembersController(base.FunctionalTest):
+    def setUp(self):
+        super(TestMembersController, self).setUp()
+
+        self.driver_origin = driver.LB_DRIVER
+        driver.LB_DRIVER = mock.Mock()
+
+    def tearDown(self):
+        driver.LB_DRIVER = self.driver_origin
+
+        super(TestMembersController, self).tearDown()
+
     @mock.patch.object(db_api, "get_member", MOCK_MEMBER)
     def test_get(self):
         resp = self.app.get('/v1/members/123')
@@ -88,11 +100,15 @@ class TestMembersController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
-    @mock.patch.object(db_api, "create_member", MOCK_MEMBER)
     def test_post(self):
+        driver.LB_DRIVER().create_member = MOCK_MEMBER
+
+        member = copy.deepcopy(MEMBER)
+        member['listener_name'] = 'listener_name'
+
         resp = self.app.post_json(
             '/v1/members',
-            MEMBER,
+            member,
         )
 
         self.assertEqual(201, resp.status_int)
@@ -100,9 +116,14 @@ class TestMembersController(base.FunctionalTest):
 
     @mock.patch.object(db_api, "create_member", MOCK_DUPLICATE)
     def test_post_dup(self):
+        driver.LB_DRIVER().create_member = MOCK_DUPLICATE
+
+        member = copy.deepcopy(MEMBER)
+        member['listener_name'] = 'listener_name'
+
         resp = self.app.post_json(
             '/v1/members',
-            MEMBER,
+            member,
             expect_errors=True
         )
 

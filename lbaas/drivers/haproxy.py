@@ -70,10 +70,11 @@ class HAProxyDriver(base.LoadBalancerDriver):
         for l in db_api.get_listeners():
             conf.extend(_build_listen(l))
 
-        file_utils.replace_file(self.config_file, conf)
+        file_utils.replace_file(self.config_file, '\n'.join(conf))
 
     def apply_changes(self):
-        return processutils.execute('service haproxy restart')
+        cmd = 'sudo service haproxy restart'.split()
+        return processutils.execute(*cmd)
 
 
 def _build_global(user_group='nogroup'):
