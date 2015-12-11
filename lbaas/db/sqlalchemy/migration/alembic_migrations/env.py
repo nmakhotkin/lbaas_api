@@ -22,7 +22,7 @@ from sqlalchemy import pool
 from lbaas.db.sqlalchemy import model_base
 
 
-importutils.try_import('lbaas.db.v2.sqlalchemy.models')
+importutils.try_import('lbaas.db.v1.sqlalchemy.models')
 
 # This is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -34,7 +34,7 @@ lbaas_config = config.lbaas_config
 c.fileConfig(config.config_file_name)
 
 # Add your model's MetaData object here for 'autogenerate' support.
-target_metadata = model_base.LbaasSecureModelBase.metadata
+target_metadata = model_base.LbaasModelBase.metadata
 
 
 def run_migrations_offline():
