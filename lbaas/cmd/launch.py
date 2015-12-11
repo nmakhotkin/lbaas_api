@@ -40,6 +40,7 @@ from wsgiref import simple_server
 
 from lbaas.api import app
 from lbaas import config
+from lbaas.drivers import driver
 
 
 CONF = cfg.CONF
@@ -90,6 +91,9 @@ def main():
         config.parse_args(get_properly_ordered_parameters())
 
         logging.setup(CONF, 'Lbaas')
+
+        driver.load_lb_drivers()
+
         launch_api()
 
     except RuntimeError as excp:

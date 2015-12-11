@@ -32,7 +32,8 @@ from lbaas.db.sqlalchemy import types
 
 
 def upgrade():
-    op.create_table('listeners_v1',
+    op.create_table(
+        'listeners_v1',
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.Column('id', sa.String(length=36), nullable=False),
@@ -44,7 +45,8 @@ def upgrade():
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name')
     )
-    op.create_table('members_v1',
+    op.create_table(
+        'members_v1',
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.Column('id', sa.String(length=36), nullable=False),
