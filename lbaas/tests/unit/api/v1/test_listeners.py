@@ -128,8 +128,9 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertEqual(409, resp.status_int)
 
-    @mock.patch.object(db_api, 'update_listener', MOCK_UPDATED_LISTENER)
     def test_put(self):
+        driver.LB_DRIVER().update_listener = MOCK_UPDATED_LISTENER
+
         resp = self.app.put_json(
             '/v1/listeners',
             FOR_UPDATED_LISTENER
@@ -139,8 +140,9 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertDictEqual(UPDATED_LISTENER, resp.json)
 
-    @mock.patch.object(db_api, 'update_listener', MOCK_NOT_FOUND)
     def test_put_not_found(self):
+        driver.LB_DRIVER().update_listener = MOCK_NOT_FOUND
+
         listener = FOR_UPDATED_LISTENER
 
         resp = self.app.put_json(

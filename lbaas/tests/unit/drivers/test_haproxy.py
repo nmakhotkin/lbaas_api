@@ -80,3 +80,61 @@ class HAProxyDriverTest(test_base.DbTestCase):
             (member.name, member.address, member.protocol_port),
             config_data
         )
+
+    @mock.patch.object(file_utils, 'replace_file')
+    def test_update_listener(self, replace_file):
+        haproxy = driver.HAProxyDriver()
+
+        haproxy.create_listener({
+            'name': 'test_listener',
+            'description': 'my test settings',
+            'protocol': 'http',
+            'protocol_port': 80,
+            'algorithm': 'roundrobin'
+        })
+
+        listener = db_api.get_listener('test_listener')
+
+        haproxy.update_listener(listener.name, {'protocol_port': 8080})
+
+        config_data = replace_file.call_args[0][1]
+
+        self.assertIn(
+            'listen %s 0.0.0.0:%s' % (listener.name, 8080),
+            config_data
+        )
+
+    @mock.patch.object(file_utils, 'replace_file')
+    def test_update_member(self, replace_file):
+        haproxy = driver.HAProxyDriver()
+
+        # Create a listener first.
+        haproxy.create_listener({
+            'name': 'test_listener',
+            'description': 'my test settings',
+            'protocol': 'http',
+            'protocol_port': 80,
+            'algorithm': 'roundrobin'
+        })
+
+        listener = db_api.get_listener('test_listener')
+
+        member = haproxy.create_member(
+            listener.name,
+            {
+                'name': 'member1',
+                'address': '10.0.0.1',
+                'protocol_port': 80,
+            }
+        )
+
+        self.assertEqual(80, member.protocol_port)
+
+        haproxy.update_member(member.name, {'protocol_port': 8080})
+
+        config_data = replace_file.call_args[0][1]
+
+        self.assertIn(
+            '\tserver %s %s:%s check' % (member.name, member.address, 8080),
+            config_data
+        )

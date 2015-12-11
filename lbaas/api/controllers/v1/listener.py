@@ -109,7 +109,15 @@ class ListenersController(rest.RestController):
             (listener.name, listener)
         )
 
-        db_model = db_api.update_listener(listener.name, listener.to_dict())
+        lb_driver = driver.LB_DRIVER()
+
+        with db_api.transaction():
+            db_model = lb_driver.update_listener(
+                listener.name,
+                listener.to_dict()
+            )
+
+            lb_driver.apply_changes()
 
         return Listener.from_dict(db_model.to_dict())
 

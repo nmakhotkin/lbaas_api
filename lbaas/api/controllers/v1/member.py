@@ -72,12 +72,14 @@ class MembersController(rest.RestController, hooks.HookController):
 
         values = member.to_dict()
 
-        return Member.from_dict(
-            db_api.update_member(
-                member.name,
-                values
-            ).to_dict()
-        )
+        lb_driver = driver.LB_DRIVER()
+
+        with db_api.transaction():
+            db_model = lb_driver.update_member(member.name, values)
+
+            lb_driver.apply_changes()
+
+        return Member.from_dict(db_model.to_dict())
 
     @rest_utils.wrap_wsme_controller_exception
     @wsme_pecan.wsexpose(Member, body=Member, status_code=201)

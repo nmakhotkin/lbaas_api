@@ -80,8 +80,9 @@ class TestMembersController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
-    @mock.patch.object(db_api, "update_member", MOCK_UPDATED_MEMBER)
     def test_put(self):
+        driver.LB_DRIVER().update_member = MOCK_UPDATED_MEMBER
+
         resp = self.app.put_json(
             '/v1/members',
             UPDATED_MEMBER,
@@ -90,8 +91,9 @@ class TestMembersController(base.FunctionalTest):
         self.assertEqual(200, resp.status_int)
         self.assertEqual(UPDATED_MEMBER, resp.json)
 
-    @mock.patch.object(db_api, "update_member", MOCK_NOT_FOUND)
     def test_put_not_found(self):
+        driver.LB_DRIVER().update_member = MOCK_NOT_FOUND
+
         resp = self.app.put_json(
             '/v1/members',
             UPDATED_MEMBER,
