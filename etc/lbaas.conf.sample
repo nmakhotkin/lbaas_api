@@ -228,5 +228,5 @@
 #debug = false
 
 [lbaas]
-impl = haproxy
+#impl = haproxy
 
