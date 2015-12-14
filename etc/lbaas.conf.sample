@@ -105,10 +105,10 @@
 # From lbaas.config
 #
 
-# Mistral API server host (string value)
+# LBaaS API server host (string value)
 #host = 0.0.0.0
 
-# Mistral API server port (port value)
+# LBaaS API server port (port value)
 # Minimum value: 1
 # Maximum value: 65535
 #port = 8993
