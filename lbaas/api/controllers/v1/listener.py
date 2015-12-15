@@ -17,6 +17,7 @@ from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
 from lbaas.api.controllers import resource
+from lbaas.api.controllers.v1 import member
 from lbaas.db.v1 import api as db_api
 from lbaas.drivers import driver
 from lbaas import exceptions as exceptions
@@ -36,6 +37,7 @@ class Listener(resource.Resource):
     protocol_port = wtypes.IntegerType()
     algorithm = wtypes.text
 
+    members = [member.Member]
     created_at = wtypes.text
     updated_at = wtypes.text
 
@@ -53,10 +55,15 @@ class ListenersController(rest.RestController):
 
         LOG.info("Fetch listeners.")
 
-        listeners = [
-            Listener.from_dict(db_model.to_dict())
-            for db_model in db_api.get_listeners()
-        ]
+        listeners = []
+
+        for l in db_api.get_listeners():
+            l_dict = l.to_dict()
+            l_dict['members'] = [
+                member.Member.from_dict(m.to_dict()) for m in l.members
+            ]
+
+            listeners += [Listener.from_dict(l_dict)]
 
         return Listeners(listeners=listeners)
 
