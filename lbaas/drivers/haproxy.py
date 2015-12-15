@@ -85,7 +85,11 @@ class HAProxyDriver(base.LoadBalancerDriver):
         file_utils.replace_file(self.config_file, '\n'.join(conf))
 
     def apply_changes(self):
-        cmd = 'sudo service haproxy restart'.split()
+        if db_api.get_listeners():
+            cmd = 'sudo service haproxy restart'.split()
+        else:
+            # There is no listeners at all.
+            cmd = 'sudo service haproxy stop'.split()
         return processutils.execute(*cmd)
 
 
