@@ -132,7 +132,7 @@ class TestListenerController(base.FunctionalTest):
         driver.LB_DRIVER().update_listener = MOCK_UPDATED_LISTENER
 
         resp = self.app.put_json(
-            '/v1/listeners',
+            '/v1/listeners/test',
             FOR_UPDATED_LISTENER
         )
 
@@ -146,7 +146,7 @@ class TestListenerController(base.FunctionalTest):
         listener = FOR_UPDATED_LISTENER
 
         resp = self.app.put_json(
-            '/v1/listeners',
+            '/v1/listeners/test',
             listener,
             expect_errors=True
         )

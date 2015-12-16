@@ -84,7 +84,7 @@ class TestMembersController(base.FunctionalTest):
         driver.LB_DRIVER().update_member = MOCK_UPDATED_MEMBER
 
         resp = self.app.put_json(
-            '/v1/members',
+            '/v1/members/123',
             UPDATED_MEMBER,
         )
 
@@ -95,7 +95,7 @@ class TestMembersController(base.FunctionalTest):
         driver.LB_DRIVER().update_member = MOCK_NOT_FOUND
 
         resp = self.app.put_json(
-            '/v1/members',
+            '/v1/members/123',
             UPDATED_MEMBER,
             expect_errors=True
         )

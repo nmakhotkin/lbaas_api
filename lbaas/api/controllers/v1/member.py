@@ -82,8 +82,8 @@ class MembersController(rest.RestController, hooks.HookController):
         return Member.from_dict(db_model.to_dict())
 
     @rest_utils.wrap_wsme_controller_exception
-    @wsme_pecan.wsexpose(Member, body=Member, status_code=201)
-    def post(self, member):
+    @wsme_pecan.wsexpose(Member, wtypes.text, body=Member, status_code=201)
+    def post(self, name, member):
         """Create a new member."""
         LOG.info("Create member [member_name=%s]" % member.name)
 

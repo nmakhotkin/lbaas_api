@@ -103,8 +103,8 @@ class ListenersController(rest.RestController):
         return Listener.from_dict(db_model.to_dict())
 
     @rest_utils.wrap_wsme_controller_exception
-    @wsme_pecan.wsexpose(Listener, body=Listener)
-    def put(self, listener):
+    @wsme_pecan.wsexpose(Listener, wtypes.text, body=Listener)
+    def put(self, name, listener):
         """Update an listener."""
         if not listener.name:
             raise exceptions.InputException(
