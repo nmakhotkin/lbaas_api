@@ -106,21 +106,17 @@ class ListenersController(rest.RestController):
     @wsme_pecan.wsexpose(Listener, wtypes.text, body=Listener)
     def put(self, name, listener):
         """Update an listener."""
-        if not listener.name:
-            raise exceptions.InputException(
-                'Name of the listener is not provided.'
-            )
 
         LOG.info(
             "Update listener [name=%s, listener=%s]" %
-            (listener.name, listener)
+            (name, listener)
         )
 
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
             db_model = lb_driver.update_listener(
-                listener.name,
+                name,
                 listener.to_dict()
             )
 

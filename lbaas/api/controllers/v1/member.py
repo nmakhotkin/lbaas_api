@@ -66,24 +66,24 @@ class MembersController(rest.RestController, hooks.HookController):
 
     @rest_utils.wrap_wsme_controller_exception
     @wsme_pecan.wsexpose(Member, wtypes.text, body=Member)
-    def put(self, id, member):
+    def put(self, name, member):
         """Update a member."""
-        LOG.info("Update member [member_name=%s]" % member.name)
+        LOG.info("Update member [member_name=%s]" % name)
 
         values = member.to_dict()
 
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
-            db_model = lb_driver.update_member(member.name, values)
+            db_model = lb_driver.update_member(name, values)
 
             lb_driver.apply_changes()
 
         return Member.from_dict(db_model.to_dict())
 
     @rest_utils.wrap_wsme_controller_exception
-    @wsme_pecan.wsexpose(Member, wtypes.text, body=Member, status_code=201)
-    def post(self, name, member):
+    @wsme_pecan.wsexpose(Member, body=Member, status_code=201)
+    def post(self, member):
         """Create a new member."""
         LOG.info("Create member [member_name=%s]" % member.name)
 
