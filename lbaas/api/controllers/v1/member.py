@@ -91,7 +91,7 @@ class MembersController(rest.RestController, hooks.HookController):
                 and member.address and member.listener_name):
             raise exceptions.InputException(
                 'You must provide at least name, protocol_port, '
-                'listener_name and protocol of the listener.'
+                'listener_name and address of the member.'
             )
 
         pecan.response.status = 201
