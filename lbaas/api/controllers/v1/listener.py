@@ -36,6 +36,8 @@ class Listener(resource.Resource):
     protocol = wtypes.text
     protocol_port = wtypes.IntegerType()
     algorithm = wtypes.text
+    options = wtypes.DictType(wtypes.text, wtypes.text)
+    ssl_info = wtypes.ArrayType(wtypes.text)
 
     members = [member.Member]
     created_at = wtypes.text

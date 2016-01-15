@@ -80,7 +80,8 @@ class HAProxyDriver(base.LoadBalancerDriver):
         conf.extend(_build_defaults())
 
         for l in db_api.get_listeners():
-            conf.extend(_build_listen(l))
+            conf.extend(_build_frontend(l))
+            conf.extend(_build_backend(l))
 
         file_utils.replace_file(self.config_file, '\n'.join(conf))
 
@@ -95,11 +96,10 @@ class HAProxyDriver(base.LoadBalancerDriver):
 
 def _build_global(user_group='nogroup'):
     opts = [
+        'log 127.0.0.1   syslog info',
         'daemon',
         'user nobody',
         'group %s' % user_group,
-        'log /dev/log local0',
-        'log /dev/log local1 notice'
     ]
 
     return itertools.chain(['global'], ('\t' + o for o in opts))
@@ -110,7 +110,8 @@ def _build_defaults():
         'log global',
         'retries 3',
         'option redispatch',
-        'timeout connect 5000',
+        'maxconn 64000',
+        'timeout connect 30000ms',
         'timeout client 50000',
         'timeout server 50000',
     ]
@@ -118,22 +119,36 @@ def _build_defaults():
     return itertools.chain(['defaults'], ('\t' + o for o in opts))
 
 
-def _build_listen(listener):
+def _build_frontend(listener):
     opts = [
         'mode %s' % listener.protocol,
-        'stats enable',
+        'default_backend %s' % listener.name,
+        'bind :%s ' % listener.protocol_port + ' '.join(listener.ssl_info)
+    ]
+
+    listener_options = ['%s %s' % (k, v) for k, v in listener.options.items()]
+
+    frontend_line = 'frontend %s' % listener.name
+
+    return itertools.chain(
+        [frontend_line],
+        ('\t' + o for o in opts),
+        ('\t' + o for o in listener_options),
+    )
+
+
+def _build_backend(listener):
+    opts = [
+        'mode %s' % listener.protocol,
         'balance %s' % listener.algorithm,
-        'option httpclose'
     ]
 
     for mem in listener.members:
         opts += [
-            'server %s %s:%s check'
+            'server %s %s:%s'
             % (mem.name, mem.address, mem.protocol_port)
         ]
 
-    listener_line = (
-        'listen %s 0.0.0.0:%s' % (listener.name, listener.protocol_port)
-    )
+    listener_line = 'backend %s' % listener.name
 
     return itertools.chain([listener_line], ('\t' + o for o in opts))
