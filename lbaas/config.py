@@ -54,8 +54,7 @@ lbaas_opts = [
     cfg.StrOpt(
         'impl',
         default='haproxy',
-        help='Implementation driver for LBaaS',
-        choices=['haproxy']
+        help='Implementation driver for LBaaS'
     ),
 ]
 
