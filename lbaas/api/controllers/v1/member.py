@@ -75,7 +75,8 @@ class MembersController(rest.RestController, hooks.HookController):
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
-            db_model = lb_driver.update_member(name, values)
+            member = db_api.update_member(name, values)
+            db_model = lb_driver.update_member(member)
 
             lb_driver.apply_changes()
 
@@ -101,7 +102,12 @@ class MembersController(rest.RestController, hooks.HookController):
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
-            db_model = lb_driver.create_member(listener_name, values)
+            listener = db_api.get_listener(listener_name)
+
+            values['listener_id'] = listener.id
+
+            member = db_api.create_member(values)
+            db_model = lb_driver.create_member(member)
 
             lb_driver.apply_changes()
 
@@ -116,7 +122,10 @@ class MembersController(rest.RestController, hooks.HookController):
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
-            lb_driver.delete_member(name)
+            member = db_api.get_member(name)
+            db_api.delete_member(name)
+
+            lb_driver.delete_member(member)
 
             lb_driver.apply_changes()
 

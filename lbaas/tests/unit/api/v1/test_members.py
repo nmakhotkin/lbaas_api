@@ -80,6 +80,7 @@ class TestMembersController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
+    @mock.patch.object(db_api, "update_member", MOCK_UPDATED_MEMBER)
     def test_put(self):
         driver.LB_DRIVER().update_member = MOCK_UPDATED_MEMBER
 
@@ -91,6 +92,7 @@ class TestMembersController(base.FunctionalTest):
         self.assertEqual(200, resp.status_int)
         self.assertEqual(UPDATED_MEMBER, resp.json)
 
+    @mock.patch.object(db_api, "update_member", MOCK_NOT_FOUND)
     def test_put_not_found(self):
         driver.LB_DRIVER().update_member = MOCK_NOT_FOUND
 
@@ -102,6 +104,8 @@ class TestMembersController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
+    @mock.patch.object(db_api, "create_member", MOCK_MEMBER)
+    @mock.patch.object(db_api, "get_listener", MOCK_MEMBER)
     def test_post(self):
         driver.LB_DRIVER().create_member = MOCK_MEMBER
 
@@ -117,6 +121,7 @@ class TestMembersController(base.FunctionalTest):
         self.assertEqual(MEMBER, resp.json)
 
     @mock.patch.object(db_api, "create_member", MOCK_DUPLICATE)
+    @mock.patch.object(db_api, "get_listener", MOCK_MEMBER)
     def test_post_dup(self):
         driver.LB_DRIVER().create_member = MOCK_DUPLICATE
 
@@ -131,6 +136,8 @@ class TestMembersController(base.FunctionalTest):
 
         self.assertEqual(409, resp.status_int)
 
+    @mock.patch.object(db_api, "get_member", MOCK_MEMBER)
+    @mock.patch.object(db_api, "delete_member", mock.Mock(return_value=None))
     def test_delete(self):
         driver.LB_DRIVER().delete_member = MOCK_DELETE
 
@@ -138,6 +145,7 @@ class TestMembersController(base.FunctionalTest):
 
         self.assertEqual(204, resp.status_int)
 
+    @mock.patch.object(db_api, "get_member", MOCK_NOT_FOUND)
     def test_delete_not_found(self):
         driver.LB_DRIVER().delete_member = MOCK_NOT_FOUND
 

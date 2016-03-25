@@ -105,6 +105,7 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
+    @mock.patch.object(db_api, "create_listener", MOCK_LISTENER)
     def test_post(self):
         driver.LB_DRIVER().create_listener = MOCK_LISTENER
 
@@ -117,6 +118,7 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertDictEqual(LISTENER, resp.json)
 
+    @mock.patch.object(db_api, "create_listener", MOCK_DUPLICATE)
     def test_post_dup(self):
         driver.LB_DRIVER().create_listener = MOCK_DUPLICATE
 
@@ -128,6 +130,7 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertEqual(409, resp.status_int)
 
+    @mock.patch.object(db_api, "update_listener", MOCK_UPDATED_LISTENER)
     def test_put(self):
         driver.LB_DRIVER().update_listener = MOCK_UPDATED_LISTENER
 
@@ -140,6 +143,7 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertDictEqual(UPDATED_LISTENER, resp.json)
 
+    @mock.patch.object(db_api, "update_listener", MOCK_NOT_FOUND)
     def test_put_not_found(self):
         driver.LB_DRIVER().update_listener = MOCK_NOT_FOUND
 
@@ -153,6 +157,12 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertEqual(404, resp.status_int)
 
+    @mock.patch.object(db_api, "get_listener", MOCK_LISTENER)
+    @mock.patch.object(
+        db_api,
+        "delete_listener",
+        mock.Mock(return_value=None)
+    )
     def test_delete(self):
         driver.LB_DRIVER().delete_listener = MOCK_DELETE
 
@@ -160,6 +170,7 @@ class TestListenerController(base.FunctionalTest):
 
         self.assertEqual(204, resp.status_int)
 
+    @mock.patch.object(db_api, "delete_listener", MOCK_NOT_FOUND)
     def test_delete_not_found(self):
         driver.LB_DRIVER().delete_listener = MOCK_NOT_FOUND
 

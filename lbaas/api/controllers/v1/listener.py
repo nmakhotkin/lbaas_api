@@ -98,7 +98,8 @@ class ListenersController(rest.RestController):
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
-            db_model = lb_driver.create_listener(listener.to_dict())
+            listener = db_api.create_listener(listener.to_dict())
+            db_model = lb_driver.create_listener(listener)
 
             lb_driver.apply_changes()
 
@@ -117,10 +118,8 @@ class ListenersController(rest.RestController):
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
-            db_model = lb_driver.update_listener(
-                name,
-                listener.to_dict()
-            )
+            listener = db_api.update_listener(name, listener.to_dict())
+            db_model = lb_driver.update_listener(listener)
 
             lb_driver.apply_changes()
 
@@ -135,6 +134,8 @@ class ListenersController(rest.RestController):
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():
-            lb_driver.delete_listener(name)
+            listener = db_api.get_listener(name)
+            lb_driver.delete_listener(listener)
+            db_api.delete_listener(name)
 
             lb_driver.apply_changes()

@@ -29,13 +29,15 @@ class HAProxyDriverTest(test_base.DbTestCase):
 
     @mock.patch.object(file_utils, 'replace_file')
     def test_create_listener(self, replace_file):
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
             'protocol_port': 80,
             'algorithm': 'roundrobin'
         })
+
+        self.haproxy.create_listener(listener)
 
         listener = db_api.get_listener('test_listener')
 
@@ -50,7 +52,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
 
     @mock.patch.object(file_utils, 'replace_file')
     def test_create_listener_with_options(self, replace_file):
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
@@ -61,6 +63,8 @@ class HAProxyDriverTest(test_base.DbTestCase):
                 'reqadd': 'X-Forwarded-Proto:\ https'
             }
         })
+
+        self.haproxy.create_listener(listener)
 
         config_data = replace_file.call_args[0][1]
 
@@ -76,7 +80,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
 
     @mock.patch.object(file_utils, 'replace_file')
     def test_create_listener_with_ssl(self, replace_file):
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
@@ -84,6 +88,8 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'algorithm': 'roundrobin',
             'ssl_info': 'ssl crt /config/cert.pem no-sslv3'.split(' ')
         })
+
+        self.haproxy.create_listener(listener)
 
         config_data = replace_file.call_args[0][1]
 
@@ -94,8 +100,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
 
     @mock.patch.object(file_utils, 'replace_file')
     def test_create_member(self, replace_file):
-        # Create a listener first.
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
@@ -103,16 +108,19 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'algorithm': 'roundrobin'
         })
 
+        # Create a listener first.
+        self.haproxy.create_listener(listener)
+
         listener = db_api.get_listener('test_listener')
 
-        self.haproxy.create_member(
-            listener.name,
-            {
-                'name': 'member1',
-                'address': '10.0.0.1',
-                'protocol_port': 80,
-            }
-        )
+        member = db_api.create_member({
+            'listener_id': listener.id,
+            'name': 'member1',
+            'address': '10.0.0.1',
+            'protocol_port': 80,
+        })
+
+        self.haproxy.create_member(member)
 
         member = db_api.get_member('member1')
 
@@ -129,7 +137,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
 
     @mock.patch.object(file_utils, 'replace_file')
     def test_update_listener(self, replace_file):
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
@@ -137,9 +145,13 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'algorithm': 'roundrobin'
         })
 
+        self.haproxy.create_listener(listener)
+
         listener = db_api.get_listener('test_listener')
 
-        self.haproxy.update_listener(listener.name, {'protocol_port': 8080})
+        db_api.update_listener(listener.name, {'protocol_port': 8080})
+
+        self.haproxy.update_listener(listener)
 
         config_data = replace_file.call_args[0][1]
 
@@ -155,8 +167,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
 
     @mock.patch.object(file_utils, 'replace_file')
     def test_update_member(self, replace_file):
-        # Create a listener first.
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
@@ -164,20 +175,25 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'algorithm': 'roundrobin'
         })
 
+        # Create a listener first.
+        self.haproxy.create_listener(listener)
+
         listener = db_api.get_listener('test_listener')
 
-        member = self.haproxy.create_member(
-            listener.name,
-            {
-                'name': 'member1',
-                'address': '10.0.0.1',
-                'protocol_port': 80,
-            }
-        )
+        member = db_api.create_member({
+            'listener_id': listener.id,
+            'name': 'member1',
+            'address': '10.0.0.1',
+            'protocol_port': 80,
+        })
+
+        member = self.haproxy.create_member(member)
 
         self.assertEqual(80, member.protocol_port)
 
-        self.haproxy.update_member(member.name, {'protocol_port': 8080})
+        member = db_api.update_member(member.name, {'protocol_port': 8080})
+
+        self.haproxy.update_member(member)
 
         config_data = replace_file.call_args[0][1]
 
@@ -189,13 +205,15 @@ class HAProxyDriverTest(test_base.DbTestCase):
     @mock.patch.object(file_utils, 'replace_file')
     def test_delete_listener(self, replace_file):
         # Create a listener first.
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
             'protocol_port': 80,
             'algorithm': 'roundrobin'
         })
+
+        self.haproxy.create_listener(listener)
 
         listener = db_api.get_listener('test_listener')
 
@@ -205,6 +223,8 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'frontend %s' % listener.name,
             config_data
         )
+
+        db_api.delete_listener(listener.name)
 
         self.haproxy.delete_listener(listener.name)
 
@@ -222,8 +242,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
 
     @mock.patch.object(file_utils, 'replace_file')
     def test_delete_member(self, replace_file):
-        # Create a listener first.
-        self.haproxy.create_listener({
+        listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
             'protocol': 'http',
@@ -231,16 +250,19 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'algorithm': 'roundrobin'
         })
 
+        # Create a listener first.
+        self.haproxy.create_listener(listener)
+
         listener = db_api.get_listener('test_listener')
 
-        self.haproxy.create_member(
-            listener.name,
-            {
-                'name': 'member1',
-                'address': '10.0.0.1',
-                'protocol_port': 80,
-            }
-        )
+        member = db_api.create_member({
+            'listener_id': listener.id,
+            'name': 'member1',
+            'address': '10.0.0.1',
+            'protocol_port': 80,
+        })
+
+        self.haproxy.create_member(member)
 
         member = db_api.get_member('member1')
 
@@ -252,7 +274,9 @@ class HAProxyDriverTest(test_base.DbTestCase):
             config_data
         )
 
-        self.haproxy.delete_member(member.name)
+        db_api.delete_member(member.name)
+
+        self.haproxy.delete_member(member)
 
         config_data = replace_file.call_args[0][1]
 

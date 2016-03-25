@@ -17,27 +17,27 @@ import abc
 
 class LoadBalancerDriver(object):
     @abc.abstractmethod
-    def create_listener(self, **kwargs):
+    def create_listener(self, listener):
         pass
 
     @abc.abstractmethod
-    def update_listener(self, **kwargs):
+    def update_listener(self, listener):
         pass
 
     @abc.abstractmethod
-    def delete_listener(self, name):
+    def delete_listener(self, listener):
         pass
 
     @abc.abstractmethod
-    def create_member(self, **kwargs):
+    def create_member(self, member):
         pass
 
     @abc.abstractmethod
-    def update_member(self, **kwargs):
+    def update_member(self, member):
         pass
 
     @abc.abstractmethod
-    def delete_member(self, name):
+    def delete_member(self, member):
         pass
 
     @abc.abstractmethod
