@@ -95,3 +95,7 @@ def parse_args(args=None, usage=None, default_config_files=None):
         usage=usage,
         default_config_files=default_config_files
     )
+
+
+def read_config():
+    CONF(project='lbaas')
