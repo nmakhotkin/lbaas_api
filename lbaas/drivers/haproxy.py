@@ -32,6 +32,10 @@ class HAProxyDriver(base.LoadBalancerDriver):
         pass
 
     def create_listener(self, listener):
+        # For HAProxy, default listener address is 0.0.0.0.
+        if not listener.address:
+            listener.address = '0.0.0.0'
+
         self._save_config()
 
         return listener
@@ -106,7 +110,10 @@ def _build_frontend(listener):
     opts = [
         'mode %s' % listener.protocol,
         'default_backend %s' % listener.name,
-        'bind :%s ' % listener.protocol_port + ' '.join(listener.ssl_info)
+        'bind %s:%s ' % (
+            listener.address,
+            listener.protocol_port
+        ) + ' '.join(listener.ssl_info)
     ]
 
     listener_options = ['%s %s' % (k, v) for k, v in listener.options.items()]

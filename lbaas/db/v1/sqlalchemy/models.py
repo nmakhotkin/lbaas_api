@@ -37,6 +37,7 @@ class Listener(mb.LbaasModelBase):
     )
 
     id = mb.id_column()
+    address = sa.Column(sa.String(200))
     name = sa.Column(sa.String(80))
     description = sa.Column(sa.Text(), nullable=True)
     protocol = sa.Column(sa.String(10))

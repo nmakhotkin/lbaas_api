@@ -83,6 +83,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
         listener = db_api.create_listener({
             'name': 'test_listener',
             'description': 'my test settings',
+            'address': '',
             'protocol': 'http',
             'protocol_port': 80,
             'algorithm': 'roundrobin',
@@ -142,7 +143,8 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'description': 'my test settings',
             'protocol': 'http',
             'protocol_port': 80,
-            'algorithm': 'roundrobin'
+            'algorithm': 'roundrobin',
+            'address': ''
         })
 
         self.haproxy.create_listener(listener)
