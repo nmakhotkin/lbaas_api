@@ -87,7 +87,7 @@ class HAProxyDriverTest(test_base.DbTestCase):
             'protocol': 'http',
             'protocol_port': 80,
             'algorithm': 'roundrobin',
-            'ssl_info': 'ssl crt /config/cert.pem no-sslv3'.split(' ')
+            'ssl_info': {'path': '/config/cert.pem', 'options': ['no-sslv3']}
         })
 
         self.haproxy.create_listener(listener)

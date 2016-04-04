@@ -33,5 +33,5 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column(
         'listeners_v1',
-        sa.Column('address', sa.String(length=200), nullable=False)
+        sa.Column('address', sa.String(length=200), nullable=True)
     )

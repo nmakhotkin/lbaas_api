@@ -44,7 +44,7 @@ class Listener(mb.LbaasModelBase):
     protocol_port = sa.Column(sa.Integer())
     algorithm = sa.Column(sa.String(30))
     options = sa.Column(st.JsonDictType(), default={})
-    ssl_info = sa.Column(st.JsonListType(), default=[])
+    ssl_info = sa.Column(st.JsonDictType(), default={})
 
 
 class Member(mb.LbaasModelBase):

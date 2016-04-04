@@ -107,13 +107,25 @@ def _build_defaults():
 
 
 def _build_frontend(listener):
+    bind_str = 'bind %s:%s' % (
+        listener.address,
+        listener.protocol_port
+    )
+
+    if listener.ssl_info:
+        path = listener.ssl_info['path']
+        options = listener.ssl_info.get('options', '')
+        ciphers = listener.ssl_info.get('ciphers', '')
+
+        bind_str = "%s ssl crt %s" % (
+            bind_str,
+            ' '.join([path, ' '.join(options), ciphers])
+        )
+
     opts = [
         'mode %s' % listener.protocol,
         'default_backend %s' % listener.name,
-        'bind %s:%s ' % (
-            listener.address,
-            listener.protocol_port
-        ) + ' '.join(listener.ssl_info)
+        bind_str
     ]
 
     listener_options = ['%s %s' % (k, v) for k, v in listener.options.items()]
