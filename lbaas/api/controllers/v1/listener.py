@@ -92,9 +92,6 @@ class ListenersController(rest.RestController):
                 ' protocol of the listener.'
             )
 
-        if not listener.algorithm:
-            listener.algorithm = 'roundrobin'
-
         lb_driver = driver.LB_DRIVER()
 
         with db_api.transaction():

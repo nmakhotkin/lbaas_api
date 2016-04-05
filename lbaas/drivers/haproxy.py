@@ -36,6 +36,9 @@ class HAProxyDriver(base.LoadBalancerDriver):
         if not listener.address:
             listener.address = '0.0.0.0'
 
+        if not listener.algorithm:
+            listener.algorithm = 'roundrobin'
+
         self._save_config()
 
         return listener
