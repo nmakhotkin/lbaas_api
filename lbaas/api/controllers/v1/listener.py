@@ -33,6 +33,7 @@ class Listener(resource.Resource):
     id = wtypes.text
     name = wtypes.text
     description = wtypes.text
+    address = wtypes.text
     protocol = wtypes.text
     protocol_port = wtypes.IntegerType()
     algorithm = wtypes.text
