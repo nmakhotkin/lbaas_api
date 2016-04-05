@@ -52,7 +52,7 @@ def upgrade():
         sa.Column('id', sa.String(length=36), nullable=False),
         sa.Column('name', sa.String(length=80), nullable=True),
         sa.Column('description', sa.String(length=255), nullable=True),
-        sa.Column('address', sa.String(length=15), nullable=True),
+        sa.Column('address', sa.String(length=200), nullable=True),
         sa.Column('protocol', sa.String(length=10), nullable=True),
         sa.Column('protocol_port', sa.Integer(), nullable=True),
         sa.Column('tags', types.JsonEncoded(), nullable=True),

@@ -61,7 +61,7 @@ class Member(mb.LbaasModelBase):
     name = sa.Column(sa.String(80))
     description = sa.Column(sa.String(255), nullable=True)
 
-    address = sa.Column(sa.String(15))
+    address = sa.Column(sa.String(200))
     protocol = sa.Column(sa.String(10))
     protocol_port = sa.Column(sa.Integer())
     tags = sa.Column(st.JsonListType())
